@@ -34,6 +34,7 @@ export default function Header() {
             { key: "expenses", label: <Link href={`/expenses`}>Expenses</Link> },
             { key: "incomes", label: <Link href={`/incomes`}>Incomes</Link> },
             { key: "investments", label: <Link href={`/investments`}>Investments</Link> },
+            { key: "about", label: <Link href={`/about`}>About</Link> },
           ]}
         />
       </Space>

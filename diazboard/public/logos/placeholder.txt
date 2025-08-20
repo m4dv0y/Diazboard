@@ -1,0 +1,1 @@
+Logos placeholder. You can replace with SVGs: nextjs.svg, typescript.svg, tailwindcss.svg, antdesign.svg, prisma.svg, neon.svg, chartjs.svg, vercel.svg

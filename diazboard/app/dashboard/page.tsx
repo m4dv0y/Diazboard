@@ -2,9 +2,11 @@
 import { Col, Row, Typography } from "antd";
 import DashboardPanel from "@/app/components/DashboardPanel";
 import TrendsChart from "@/app/components/TrendsChart";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useCurrency } from "@/app/components/CurrencyProvider";
 
 export default function DashboardPage() {
+  const { currency, getRate } = useCurrency();
   const [totalIncome, setTotalIncome] = useState(0);
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [totalInvestments, setTotalInvestments] = useState(0);
@@ -25,7 +27,34 @@ export default function DashboardPage() {
     });
   }, []);
 
-  const formatMoney = (cents: number) => `$${(cents / 100).toLocaleString()}`;
+  const [baseTotals, setBaseTotals] = useState<{ income: number; expenses: number; investments: number } | null>(null);
+
+  useEffect(() => {
+    setBaseTotals({ income: totalIncome, expenses: totalExpenses, investments: totalInvestments });
+  }, [totalIncome, totalExpenses, totalInvestments]);
+
+  const [converted, setConverted] = useState<{ income: number; expenses: number; investments: number }>({ income: 0, expenses: 0, investments: 0 });
+
+  useEffect(() => {
+    let cancelled = false;
+    async function convert() {
+      if (!baseTotals) return;
+      // naive approach: assume income/expense/investment currencies vary; for MVP, treat as USD and convert totals to selected currency
+      const rate = await getRate("USD" as any, currency as any);
+      if (cancelled) return;
+      setConverted({
+        income: Math.round(baseTotals.income * rate),
+        expenses: Math.round(baseTotals.expenses * rate),
+        investments: Math.round(baseTotals.investments * rate),
+      });
+    }
+    convert();
+    return () => {
+      cancelled = true;
+    };
+  }, [baseTotals, currency, getRate]);
+
+  const formatMoney = (cents: number) => `${(cents / 100).toLocaleString()} ${currency}`;
 
   return (
     <div className="p-2 sm:p-4">
@@ -37,16 +66,16 @@ export default function DashboardPage() {
         </Col>
 
         <Col xs={24} sm={12} lg={6}>
-          <DashboardPanel title="Total Income" value={formatMoney(totalIncome)} />
+          <DashboardPanel title="Total Income" value={formatMoney(converted.income)} />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <DashboardPanel title="Total Expenses" value={formatMoney(totalExpenses)} />
+          <DashboardPanel title="Total Expenses" value={formatMoney(converted.expenses)} />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <DashboardPanel title="Net" value={formatMoney(totalIncome - totalExpenses)} />
+          <DashboardPanel title="Net" value={formatMoney(converted.income - converted.expenses)} />
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <DashboardPanel title="Investments" value={formatMoney(totalInvestments)} />
+          <DashboardPanel title="Investments" value={formatMoney(converted.investments)} />
         </Col>
 
         <Col span={24}>
