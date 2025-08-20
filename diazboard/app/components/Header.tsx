@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Select, Layout, Menu, Space, Typography } from "antd";
+import { Select, Layout, Menu, Space, Typography, theme } from "antd";
+import { useCurrency } from "@/app/components/CurrencyProvider";
 import { useMemo } from "react";
 
 const { Header: AntHeader } = Layout;
@@ -16,9 +17,11 @@ const currencyOptions = [
 export default function Header() {
   const pathname = usePathname();
   const currentPath = pathname || "/";
+  const { currency, setCurrency } = useCurrency();
+  const { token } = theme.useToken();
 
   return (
-    <AntHeader className="bg-white px-4 flex items-center justify-between shadow-sm">
+    <AntHeader style={{ background: token.colorBgContainer }} className="px-4 flex items-center justify-between shadow-sm">
       <Space size={16} className="items-center">
         <Typography.Title level={4} className="!mb-0">
           <Link href={`/dashboard`}>DiazBoard</Link>
@@ -35,11 +38,7 @@ export default function Header() {
         />
       </Space>
       <Space size={12}>
-        <Select
-          defaultValue="USD"
-          options={currencyOptions}
-          style={{ width: 100 }}
-        />
+        <Select value={currency} options={currencyOptions} style={{ width: 120 }} onChange={(v) => setCurrency(v as any)} />
       </Space>
     </AntHeader>
   );

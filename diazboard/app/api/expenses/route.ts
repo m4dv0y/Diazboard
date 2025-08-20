@@ -46,3 +46,20 @@ export async function DELETE(req: NextRequest) {
   await prisma.expense.delete({ where: { id } });
   return NextResponse.json({ ok: true });
 }
+
+export async function PUT(req: NextRequest) {
+  const body = await req.json();
+  if (!body?.id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  if (!isDatabaseEnabled()) return NextResponse.json({ ok: true });
+  const updated = await prisma.expense.update({
+    where: { id: body.id },
+    data: {
+      date: body.date ? new Date(body.date) : undefined,
+      category: body.category,
+      description: body.description ?? undefined,
+      amountCents: body.amountCents != null ? Number(body.amountCents) : undefined,
+      currency: body.currency as Currency,
+    },
+  });
+  return NextResponse.json(updated);
+}
