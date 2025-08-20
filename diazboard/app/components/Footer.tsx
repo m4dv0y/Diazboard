@@ -18,10 +18,6 @@ export default function Footer() {
             <span>TypeScript</span>
           </div>
           <div className="flex items-center gap-2">
-            <Image src="/tailwindcss.svg" alt="Tailwind CSS" width={20} height={20} />
-            <span>Tailwind CSS</span>
-          </div>
-          <div className="flex items-center gap-2">
             <Image src="/antd.svg" alt="Ant Design" width={20} height={20} />
             <span>Ant Design</span>
           </div>
@@ -37,10 +33,7 @@ export default function Footer() {
             <Image src="/chartjs.svg" alt="Chart.js" width={20} height={20} />
             <span>Chart.js</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Image src="/vercel.svg" alt="Vercel" width={20} height={20} />
-            <span>Vercel</span>
-          </div>
+          
         </div>
       </div>
     </Layout.Footer>

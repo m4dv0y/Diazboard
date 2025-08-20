@@ -28,13 +28,13 @@ export default function TrendsChart({ labels, income, expenses }: { labels: stri
     ],
   };
 
-  return (
-    <Card bordered className="shadow-sm">
-      <Typography.Title level={4} className="!mb-4">
-        Monthly Trend
-      </Typography.Title>
-      <Line data={data} />
-    </Card>
-  );
+  // return (
+  //   <Card bordered className="shadow-sm">
+  //     <Typography.Title level={4} className="!mb-4">
+  //       Monthly Trend
+  //     </Typography.Title>
+  //     <Line data={data} />
+  //   </Card>
+  // );
 }
 

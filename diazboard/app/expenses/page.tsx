@@ -166,7 +166,7 @@ export default function ExpensesPage() {
       <Space direction="vertical" size={16} className="w-full">
         <Typography.Title level={3} className="!mb-0">💸 Expenses</Typography.Title>
         
-        <Card bordered className="shadow-sm">
+        <Card variant="outlined" className="shadow-sm">
           <div className="mb-4">
             <AntInput
               placeholder="Search by category, currency, or amount..."
