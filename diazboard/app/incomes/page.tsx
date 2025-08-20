@@ -1,6 +1,7 @@
 "use client";
 import { Button, Card, Modal, Table, Form, Input, DatePicker, Select, InputNumber, Typography, Space, Tag } from "antd";
 import { useEffect, useMemo, useState } from "react";
+import { format } from "date-fns";
 
 type Income = {
   id: string;
@@ -38,7 +39,14 @@ export default function IncomesPage() {
 
   const columns = useMemo(
     () => [
-      { title: "Date", dataIndex: "date" },
+      {
+        title: "Date",
+        dataIndex: "date",
+        render: (d: string) => {
+          const dt = new Date(d);
+          return isNaN(dt.getTime()) ? d : format(dt, "dd/MM/yyyy");
+        },
+      },
       { title: "Source", dataIndex: "source" },
       { title: "Description", dataIndex: "description" },
       {
