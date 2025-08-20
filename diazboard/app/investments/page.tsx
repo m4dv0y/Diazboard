@@ -1,6 +1,5 @@
 "use client";
 import { Button, Card, Modal, Table, Form, Input, Select, InputNumber } from "antd";
-import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
 type Investment = {
@@ -21,7 +20,6 @@ const currencyOptions = [
 ];
 
 export default function InvestmentsPage() {
-  const t = useTranslations();
   const [data, setData] = useState<Investment[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -41,15 +39,15 @@ export default function InvestmentsPage() {
 
   const columns = useMemo(
     () => [
-      { title: t("investment.platform"), dataIndex: "platform" },
-      { title: t("investment.asset"), dataIndex: "asset" },
+      { title: "Platform", dataIndex: "platform" },
+      { title: "Asset", dataIndex: "asset" },
       {
-        title: t("investment.amount"),
+        title: "Amount",
         dataIndex: "amountCents",
         render: (cents: number, row: Investment) => `${(cents / 100).toFixed(2)} ${row.currency}`,
       },
-      { title: t("investment.allocation"), dataIndex: "allocation", render: (v: number) => `${v}%` },
-      { title: t("investment.performance"), dataIndex: "performance", render: (v: number) => `${v}%` },
+      { title: "Allocation (%)", dataIndex: "allocation", render: (v: number) => `${v}%` },
+      { title: "Performance (%)", dataIndex: "performance", render: (v: number) => `${v}%` },
       {
         title: "",
         dataIndex: "actions",
@@ -57,20 +55,20 @@ export default function InvestmentsPage() {
           <Button danger onClick={async () => {
             await fetch(`/api/investments?id=${row.id}`, { method: "DELETE" });
             load();
-          }}>{t("actions.delete")}</Button>
+          }}>Delete</Button>
         ),
       },
     ],
-    [t]
+    []
   );
 
   return (
     <div className="p-6">
-      <Card title={t("nav.investments")} extra={<Button type="primary" onClick={() => setOpen(true)}>{t("actions.add")}</Button>}>
+      <Card title="Investments" extra={<Button type="primary" onClick={() => setOpen(true)}>Add</Button>}>
         <Table rowKey="id" dataSource={data} columns={columns as any} loading={loading} />
       </Card>
       <Modal
-        title={t("actions.add")}
+        title="Add Investment"
         open={open}
         onCancel={() => setOpen(false)}
         onOk={async () => {
@@ -89,22 +87,22 @@ export default function InvestmentsPage() {
         }}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="platform" label={t("investment.platform")} rules={[{ required: true }]}>
+          <Form.Item name="platform" label="Platform" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="asset" label={t("investment.asset")} rules={[{ required: true }]}>
+          <Form.Item name="asset" label="Asset" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="amount" label={t("investment.amount")} rules={[{ required: true }]}>
+          <Form.Item name="amount" label="Amount" rules={[{ required: true }]}>
             <InputNumber className="w-full" min={0} step={0.01} />
           </Form.Item>
-          <Form.Item name="currency" label={t("header.currency")} rules={[{ required: true }]} initialValue={"USD"}>
+          <Form.Item name="currency" label="Currency" rules={[{ required: true }]} initialValue={"USD"}>
             <Select options={currencyOptions} />
           </Form.Item>
-          <Form.Item name="allocation" label={t("investment.allocation")} rules={[{ required: true }]} initialValue={0}>
+          <Form.Item name="allocation" label="Allocation (%)" rules={[{ required: true }]} initialValue={0}>
             <InputNumber className="w-full" min={0} max={100} />
           </Form.Item>
-          <Form.Item name="performance" label={t("investment.performance")} rules={[{ required: true }]} initialValue={0}>
+          <Form.Item name="performance" label="Performance (%)" rules={[{ required: true }]} initialValue={0}>
             <InputNumber className="w-full" min={-100} max={1000} />
           </Form.Item>
         </Form>

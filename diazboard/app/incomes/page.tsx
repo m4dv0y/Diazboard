@@ -1,12 +1,11 @@
 "use client";
 import { Button, Card, Modal, Table, Form, Input, DatePicker, Select, InputNumber } from "antd";
-import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
-type Expense = {
+type Income = {
   id: string;
   date: string;
-  category: string;
+  source: string;
   description?: string | null;
   amountCents: number;
   currency: string;
@@ -19,16 +18,15 @@ const currencyOptions = [
   { label: "PHP", value: "PHP" },
 ];
 
-export default function ExpensesPage() {
-  const t = useTranslations();
-  const [data, setData] = useState<Expense[]>([]);
+export default function IncomesPage() {
+  const [data, setData] = useState<Income[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
 
   async function load() {
     setLoading(true);
-    const res = await fetch("/api/expenses");
+    const res = await fetch("/api/incomes");
     const json = await res.json();
     setData(json);
     setLoading(false);
@@ -40,40 +38,40 @@ export default function ExpensesPage() {
 
   const columns = useMemo(
     () => [
-      { title: t("expense.date"), dataIndex: "date" },
-      { title: t("expense.category"), dataIndex: "category" },
-      { title: t("expense.description"), dataIndex: "description" },
+      { title: "Date", dataIndex: "date" },
+      { title: "Source", dataIndex: "source" },
+      { title: "Description", dataIndex: "description" },
       {
-        title: t("expense.amount"),
+        title: "Amount",
         dataIndex: "amountCents",
-        render: (cents: number, row: Expense) => `${(cents / 100).toFixed(2)} ${row.currency}`,
+        render: (cents: number, row: Income) => `${(cents / 100).toFixed(2)} ${row.currency}`,
       },
       {
         title: "",
         dataIndex: "actions",
-        render: (_: any, row: Expense) => (
+        render: (_: any, row: Income) => (
           <Button danger onClick={async () => {
-            await fetch(`/api/expenses?id=${row.id}`, { method: "DELETE" });
+            await fetch(`/api/incomes?id=${row.id}`, { method: "DELETE" });
             load();
-          }}>{t("actions.delete")}</Button>
+          }}>Delete</Button>
         ),
       },
     ],
-    [t]
+    []
   );
 
   return (
     <div className="p-6">
-      <Card title={t("nav.expenses")} extra={<Button type="primary" onClick={() => setOpen(true)}>{t("actions.add")}</Button>}>
+      <Card title="Incomes" extra={<Button type="primary" onClick={() => setOpen(true)}>Add</Button>}>
         <Table rowKey="id" dataSource={data} columns={columns as any} loading={loading} />
       </Card>
       <Modal
-        title={t("actions.add")}
+        title="Add Income"
         open={open}
         onCancel={() => setOpen(false)}
         onOk={async () => {
           const values = await form.validateFields();
-          await fetch("/api/expenses", {
+          await fetch("/api/incomes", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -88,19 +86,19 @@ export default function ExpensesPage() {
         }}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="date" label={t("expense.date")} rules={[{ required: true }]}>
+          <Form.Item name="date" label="Date" rules={[{ required: true }]}>
             <DatePicker className="w-full" />
           </Form.Item>
-          <Form.Item name="category" label={t("expense.category")} rules={[{ required: true }]}>
+          <Form.Item name="source" label="Source" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="description" label={t("expense.description")}> 
+          <Form.Item name="description" label="Description">
             <Input />
           </Form.Item>
-          <Form.Item name="amount" label={t("expense.amount")} rules={[{ required: true }]}>
+          <Form.Item name="amount" label="Amount" rules={[{ required: true }]}>
             <InputNumber className="w-full" min={0} step={0.01} />
           </Form.Item>
-          <Form.Item name="currency" label={t("header.currency")} rules={[{ required: true }]} initialValue={"USD"}>
+          <Form.Item name="currency" label="Currency" rules={[{ required: true }]} initialValue={"USD"}>
             <Select options={currencyOptions} />
           </Form.Item>
         </Form>
