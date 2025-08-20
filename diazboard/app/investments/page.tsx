@@ -1,5 +1,5 @@
 "use client";
-import { Button, Card, Modal, Table, Form, Input, Select, InputNumber } from "antd";
+import { Button, Card, Modal, Table, Form, Input, Select, InputNumber, Typography, Space, Tag } from "antd";
 import { useEffect, useMemo, useState } from "react";
 
 type Investment = {
@@ -46,16 +46,19 @@ export default function InvestmentsPage() {
         dataIndex: "amountCents",
         render: (cents: number, row: Investment) => `${(cents / 100).toFixed(2)} ${row.currency}`,
       },
+      { title: "Currency", dataIndex: "currency", render: (c: string) => <Tag>{c}</Tag> },
       { title: "Allocation (%)", dataIndex: "allocation", render: (v: number) => `${v}%` },
       { title: "Performance (%)", dataIndex: "performance", render: (v: number) => `${v}%` },
       {
         title: "",
         dataIndex: "actions",
         render: (_: any, row: Investment) => (
-          <Button danger onClick={async () => {
-            await fetch(`/api/investments?id=${row.id}`, { method: "DELETE" });
-            load();
-          }}>Delete</Button>
+          <Space>
+            <Button danger onClick={async () => {
+              await fetch(`/api/investments?id=${row.id}`, { method: "DELETE" });
+              load();
+            }}>Delete</Button>
+          </Space>
         ),
       },
     ],
@@ -63,10 +66,25 @@ export default function InvestmentsPage() {
   );
 
   return (
-    <div className="p-6">
-      <Card title="Investments" extra={<Button type="primary" onClick={() => setOpen(true)}>Add</Button>}>
-        <Table rowKey="id" dataSource={data} columns={columns as any} loading={loading} />
-      </Card>
+    <div className="p-2 sm:p-4">
+      <Space direction="vertical" size={16} className="w-full">
+        <Typography.Title level={3} className="!mb-0">Investments</Typography.Title>
+        <Card
+          bordered
+          className="shadow-sm"
+          extra={<Button type="primary" onClick={() => setOpen(true)}>Add</Button>}
+        >
+          <Table
+            rowKey="id"
+            dataSource={data}
+            columns={columns as any}
+            loading={loading}
+            bordered
+            size="middle"
+            scroll={{ x: true }}
+          />
+        </Card>
+      </Space>
       <Modal
         title="Add Investment"
         open={open}
@@ -85,6 +103,7 @@ export default function InvestmentsPage() {
           form.resetFields();
           load();
         }}
+        width={520}
       >
         <Form form={form} layout="vertical">
           <Form.Item name="platform" label="Platform" rules={[{ required: true }]}>

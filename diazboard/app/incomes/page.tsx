@@ -1,5 +1,5 @@
 "use client";
-import { Button, Card, Modal, Table, Form, Input, DatePicker, Select, InputNumber } from "antd";
+import { Button, Card, Modal, Table, Form, Input, DatePicker, Select, InputNumber, Typography, Space, Tag } from "antd";
 import { useEffect, useMemo, useState } from "react";
 
 type Income = {
@@ -46,14 +46,17 @@ export default function IncomesPage() {
         dataIndex: "amountCents",
         render: (cents: number, row: Income) => `${(cents / 100).toFixed(2)} ${row.currency}`,
       },
+      { title: "Currency", dataIndex: "currency", render: (c: string) => <Tag>{c}</Tag> },
       {
         title: "",
         dataIndex: "actions",
         render: (_: any, row: Income) => (
-          <Button danger onClick={async () => {
-            await fetch(`/api/incomes?id=${row.id}`, { method: "DELETE" });
-            load();
-          }}>Delete</Button>
+          <Space>
+            <Button danger onClick={async () => {
+              await fetch(`/api/incomes?id=${row.id}`, { method: "DELETE" });
+              load();
+            }}>Delete</Button>
+          </Space>
         ),
       },
     ],
@@ -61,10 +64,25 @@ export default function IncomesPage() {
   );
 
   return (
-    <div className="p-6">
-      <Card title="Incomes" extra={<Button type="primary" onClick={() => setOpen(true)}>Add</Button>}>
-        <Table rowKey="id" dataSource={data} columns={columns as any} loading={loading} />
-      </Card>
+    <div className="p-2 sm:p-4">
+      <Space direction="vertical" size={16} className="w-full">
+        <Typography.Title level={3} className="!mb-0">Incomes</Typography.Title>
+        <Card
+          bordered
+          className="shadow-sm"
+          extra={<Button type="primary" onClick={() => setOpen(true)}>Add</Button>}
+        >
+          <Table
+            rowKey="id"
+            dataSource={data}
+            columns={columns as any}
+            loading={loading}
+            bordered
+            size="middle"
+            scroll={{ x: true }}
+          />
+        </Card>
+      </Space>
       <Modal
         title="Add Income"
         open={open}
@@ -84,6 +102,7 @@ export default function IncomesPage() {
           form.resetFields();
           load();
         }}
+        width={520}
       >
         <Form form={form} layout="vertical">
           <Form.Item name="date" label="Date" rules={[{ required: true }]}>

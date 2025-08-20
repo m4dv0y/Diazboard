@@ -21,13 +21,13 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-2 sm:p-4">
       <Row gutter={[16, 16]}>
         <Col span={24}>
-          <Typography.Title level={3}>Dashboard</Typography.Title>
+          <Typography.Title level={3} className="!mb-0">Dashboard</Typography.Title>
         </Col>
         <Col span={24}>
-          <Card>
+          <Card bordered className="shadow-sm">
             <Line data={data} />
           </Card>
         </Col>
