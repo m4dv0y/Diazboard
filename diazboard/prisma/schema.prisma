@@ -26,7 +26,6 @@ model Expense {
   id           String    @id @default(cuid())
   date         DateTime
   category     String
-  description  String?
   amountCents  Int
   currency     Currency
   createdAt    DateTime  @default(now())
@@ -37,7 +36,6 @@ model Income {
   id           String    @id @default(cuid())
   date         DateTime
   source       String
-  description  String?
   amountCents  Int
   currency     Currency
   createdAt    DateTime  @default(now())

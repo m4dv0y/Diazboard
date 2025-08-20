@@ -18,7 +18,6 @@ export async function POST(req: NextRequest) {
       id: `i_${Date.now()}`,
       date: new Date(body.date),
       source: body.source,
-      description: body.description || null,
       amountCents: Number(body.amountCents),
       currency: body.currency as Currency,
       createdAt: new Date(),
@@ -30,7 +29,6 @@ export async function POST(req: NextRequest) {
     data: {
       date: new Date(body.date),
       source: body.source,
-      description: body.description || null,
       amountCents: Number(body.amountCents),
       currency: body.currency as Currency,
     },
@@ -56,7 +54,6 @@ export async function PUT(req: NextRequest) {
     data: {
       date: body.date ? new Date(body.date) : undefined,
       source: body.source,
-      description: body.description ?? undefined,
       amountCents: body.amountCents != null ? Number(body.amountCents) : undefined,
       currency: body.currency as Currency,
     },

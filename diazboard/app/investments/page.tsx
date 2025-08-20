@@ -1,7 +1,8 @@
 "use client";
-import { Button, Card, Modal, Table, Form, Input, Select, InputNumber, Typography, Space, Tag } from "antd";
+import { Button, Card, Modal, Table, Form, Input, Select, InputNumber, Typography, Space, Tag, Input as AntInput } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
+import { SearchOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
 type Investment = {
   id: string;
@@ -22,8 +23,11 @@ const currencyOptions = [
 
 export default function InvestmentsPage() {
   const [data, setData] = useState<Investment[]>([]);
+  const [filteredData, setFilteredData] = useState<Investment[]>([]);
   const [open, setOpen] = useState(false);
+  const [editingInvestment, setEditingInvestment] = useState<Investment | null>(null);
   const [loading, setLoading] = useState(false);
+  const [searchText, setSearchText] = useState("");
   const [form] = Form.useForm();
 
   async function load() {
@@ -31,6 +35,7 @@ export default function InvestmentsPage() {
     const res = await fetch("/api/investments");
     const json = await res.json();
     setData(json);
+    setFilteredData(json);
     setLoading(false);
   }
 
@@ -38,72 +43,187 @@ export default function InvestmentsPage() {
     load();
   }, []);
 
+  // Filter data based on search text
+  useEffect(() => {
+    const filtered = data.filter(item =>
+      item.platform.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.asset.toLowerCase().includes(searchText.toLowerCase()) ||
+      item.currency.toLowerCase().includes(searchText.toLowerCase()) ||
+      (item.amountCents / 100).toString().includes(searchText) ||
+      item.allocation.toString().includes(searchText) ||
+      item.performance.toString().includes(searchText)
+    );
+    setFilteredData(filtered);
+  }, [data, searchText]);
+
+  const handleEdit = (record: Investment) => {
+    setEditingInvestment(record);
+    form.setFieldsValue({
+      ...record,
+      amount: record.amountCents / 100,
+    });
+    setOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    const values = await form.validateFields();
+    const payload = {
+      ...values,
+      amountCents: Math.round(values.amount * 100),
+    };
+
+    if (editingInvestment) {
+      await fetch("/api/investments", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...payload, id: editingInvestment.id }),
+      });
+    } else {
+      await fetch("/api/investments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    }
+
+    setOpen(false);
+    setEditingInvestment(null);
+    form.resetFields();
+    load();
+  };
+
+  const handleCancel = () => {
+    setOpen(false);
+    setEditingInvestment(null);
+    form.resetFields();
+  };
+
   const columns = useMemo(
     () => [
-      { title: "Platform", dataIndex: "platform" },
-      { title: "Asset", dataIndex: "asset" },
+      { 
+        title: "Platform", 
+        dataIndex: "platform",
+        key: "platform",
+        sorter: (a: Investment, b: Investment) => a.platform.localeCompare(b.platform),
+        filters: [...new Set(data.map(item => item.platform))].map(platform => ({ text: platform, value: platform })),
+        onFilter: (value: string, record: Investment) => record.platform === value,
+      },
+      { 
+        title: "Asset", 
+        dataIndex: "asset",
+        key: "asset",
+        sorter: (a: Investment, b: Investment) => a.asset.localeCompare(b.asset),
+        filters: [...new Set(data.map(item => item.asset))].map(asset => ({ text: asset, value: asset })),
+        onFilter: (value: string, record: Investment) => record.asset === value,
+      },
       {
         title: "Amount",
         dataIndex: "amountCents",
+        key: "amountCents",
+        sorter: (a: Investment, b: Investment) => a.amountCents - b.amountCents,
         render: (cents: number, row: Investment) => `${(cents / 100).toFixed(2)} ${row.currency}`,
       },
-      { title: "Currency", dataIndex: "currency", render: (c: string) => <Tag>{c}</Tag> },
-      { title: "Allocation (%)", dataIndex: "allocation", render: (v: number) => `${v}%` },
-      { title: "Performance (%)", dataIndex: "performance", render: (v: number) => `${v}%` },
+      { 
+        title: "Currency", 
+        dataIndex: "currency", 
+        key: "currency",
+        render: (c: string) => <Tag>{c}</Tag>,
+        filters: currencyOptions.map(opt => ({ text: opt.label, value: opt.value })),
+        onFilter: (value: string, record: Investment) => record.currency === value,
+      },
+      { 
+        title: "Allocation (%)", 
+        dataIndex: "allocation", 
+        key: "allocation",
+        sorter: (a: Investment, b: Investment) => a.allocation - b.allocation,
+        render: (v: number) => `${v}%` 
+      },
+      { 
+        title: "Performance (%)", 
+        dataIndex: "performance", 
+        key: "performance",
+        sorter: (a: Investment, b: Investment) => a.performance - b.performance,
+        render: (v: number) => (
+          <span style={{ color: v >= 0 ? 'green' : 'red' }}>
+            {v >= 0 ? '+' : ''}{v}%
+          </span>
+        )
+      },
       {
-        title: "",
-        dataIndex: "actions",
+        title: "Actions",
+        key: "actions",
         render: (_: any, row: Investment) => (
           <Space>
-            <Button danger onClick={async () => {
-              await fetch(`/api/investments?id=${row.id}`, { method: "DELETE" });
-              load();
-            }}>Delete</Button>
+            <Button 
+              type="primary" 
+              icon={<EditOutlined />} 
+              size="small"
+              onClick={() => handleEdit(row)}
+            >
+              Edit
+            </Button>
+            <Button 
+              danger 
+              icon={<DeleteOutlined />}
+              size="small"
+              onClick={async () => {
+                await fetch(`/api/investments?id=${row.id}`, { method: "DELETE" });
+                load();
+              }}
+            >
+              Delete
+            </Button>
           </Space>
         ),
       },
     ],
-    []
+    [data]
   );
 
   return (
     <div className="p-2 sm:p-4">
       <Space direction="vertical" size={16} className="w-full">
-        <Typography.Title level={3} className="!mb-0">Investments</Typography.Title>
-        <Card
-          bordered
-          className="shadow-sm"
-          extra={<Button type="primary" onClick={() => setOpen(true)}>Add</Button>}
-        >
+        <Typography.Title level={3} className="!mb-0">📈 Investments</Typography.Title>
+        
+        <Card bordered className="shadow-sm">
+          <div className="mb-4">
+            <AntInput
+              placeholder="Search by platform, asset, currency, amount, allocation, or performance..."
+              prefix={<SearchOutlined />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ maxWidth: 300 }}
+            />
+          </div>
+          
+          <div className="mb-4">
+            <Button type="primary" onClick={() => setOpen(true)}>
+              ➕ Add Investment
+            </Button>
+          </div>
+
           <Table
             rowKey="id"
-            dataSource={data}
+            dataSource={filteredData}
             columns={columns as any}
             loading={loading}
             bordered
             size="middle"
             scroll={{ x: true }}
+            pagination={{
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+            }}
           />
         </Card>
       </Space>
+      
       <Modal
-        title="Add Investment"
+        title={editingInvestment ? "Edit Investment" : "Add Investment"}
         open={open}
-        onCancel={() => setOpen(false)}
-        onOk={async () => {
-          const values = await form.validateFields();
-          await fetch("/api/investments", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              ...values,
-              amountCents: Math.round(values.amount * 100),
-            }),
-          });
-          setOpen(false);
-          form.resetFields();
-          load();
-        }}
+        onCancel={handleCancel}
+        onOk={handleSubmit}
         width={520}
       >
         <Form form={form} layout="vertical">

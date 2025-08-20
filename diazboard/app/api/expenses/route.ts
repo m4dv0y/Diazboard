@@ -18,7 +18,6 @@ export async function POST(req: NextRequest) {
       id: `e_${Date.now()}`,
       date: new Date(body.date),
       category: body.category,
-      description: body.description || null,
       amountCents: Number(body.amountCents),
       currency: body.currency as Currency,
       createdAt: new Date(),
@@ -30,7 +29,6 @@ export async function POST(req: NextRequest) {
     data: {
       date: new Date(body.date),
       category: body.category,
-      description: body.description || null,
       amountCents: Number(body.amountCents),
       currency: body.currency as Currency,
     },
@@ -47,8 +45,6 @@ export async function DELETE(req: NextRequest) {
   return NextResponse.json({ ok: true });
 }
 
-// duplicate PUT removed
-
 export async function PUT(req: NextRequest) {
   const body = await req.json();
   if (!body?.id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
@@ -58,7 +54,6 @@ export async function PUT(req: NextRequest) {
     data: {
       date: body.date ? new Date(body.date) : undefined,
       category: body.category,
-      description: body.description ?? undefined,
       amountCents: body.amountCents != null ? Number(body.amountCents) : undefined,
       currency: body.currency as Currency,
     },
