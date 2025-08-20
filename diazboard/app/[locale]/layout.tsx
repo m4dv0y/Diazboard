@@ -17,7 +17,11 @@ export default async function LocaleLayout({
   if (!isSupportedLocale(locale)) notFound();
   const messages = await getMessages();
   return (
-    <NextIntlClientProvider messages={messages}>
+    <NextIntlClientProvider
+      messages={messages}
+      onError={() => { /* ignore missing message errors in mock/demo mode */ }}
+      getMessageFallback={({ key }) => key}
+    >
       <Layout style={{ minHeight: "100vh" }}>
         <Header />
         <Layout.Content>{children}</Layout.Content>
