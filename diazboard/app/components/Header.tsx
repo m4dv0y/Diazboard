@@ -17,7 +17,8 @@ const currencyOptions = [
 export default function Header() {
   const t = useTranslations();
   const pathname = usePathname();
-  const [_, locale, ...rest] = pathname.split("/");
+  const [_, maybeLocale, ...rest] = pathname.split("/");
+  const locale = ["en", "es"].includes(maybeLocale) ? maybeLocale : "en";
 
   const basePath = useMemo(() => `/${locale}`, [locale]);
   const currentPath = `/${rest.join("/")}`;

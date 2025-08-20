@@ -4,8 +4,9 @@ import { locales, defaultLocale } from "./i18n/routing";
 export default createMiddleware({
   locales,
   defaultLocale,
+  localePrefix: "as-needed",
 });
 
 export const config = {
-  matcher: ["/", "/(en|es)/:path*"],
+  matcher: ["/((?!api|_next|.*\\..*).*)"],
 };
