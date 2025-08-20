@@ -15,17 +15,49 @@ export default function DashboardPage() {
   const [expenseSeries, setExpenseSeries] = useState<number[]>([800, 900, 1100, 1000, 1200, 1100]);
 
   useEffect(() => {
-    // Fetch summaries
-    Promise.all([
-      fetch("/api/incomes").then((r) => r.json()),
-      fetch("/api/expenses").then((r) => r.json()),
-      fetch("/api/investments").then((r) => r.json()),
-    ]).then(([incomes, expenses, investments]) => {
-      setTotalIncome(incomes.reduce((sum: number, i: any) => sum + (i.amountCents || 0), 0));
-      setTotalExpenses(expenses.reduce((sum: number, e: any) => sum + (e.amountCents || 0), 0));
-      setTotalInvestments(investments.reduce((sum: number, v: any) => sum + (v.amountCents || 0), 0));
-    });
-  }, []);
+    async function load() {
+      const [incomes, expenses, investments] = await Promise.all([
+        fetch("/api/incomes").then((r) => r.json()),
+        fetch("/api/expenses").then((r) => r.json()),
+        fetch("/api/investments").then((r) => r.json()),
+      ]);
+
+      const convertRes = await fetch("/api/convert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          target: currency,
+          items: [
+            ...incomes.map((i: any) => ({ amountCents: i.amountCents, currency: i.currency })),
+            ...expenses.map((e: any) => ({ amountCents: e.amountCents, currency: e.currency })),
+            ...investments.map((v: any) => ({ amountCents: v.amountCents, currency: v.currency })),
+          ],
+        }),
+      }).then((r) => r.json());
+
+      // For panel totals, compute separately using the same target
+      const incomeRes = await fetch("/api/convert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target: currency, items: incomes.map((i: any) => ({ amountCents: i.amountCents, currency: i.currency })) }),
+      }).then((r) => r.json());
+      const expenseRes = await fetch("/api/convert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target: currency, items: expenses.map((e: any) => ({ amountCents: e.amountCents, currency: e.currency })) }),
+      }).then((r) => r.json());
+      const investRes = await fetch("/api/convert", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target: currency, items: investments.map((v: any) => ({ amountCents: v.amountCents, currency: v.currency })) }),
+      }).then((r) => r.json());
+
+      setTotalIncome(incomeRes.totalCents || 0);
+      setTotalExpenses(expenseRes.totalCents || 0);
+      setTotalInvestments(investRes.totalCents || 0);
+    }
+    load();
+  }, [currency]);
 
   const [baseTotals, setBaseTotals] = useState<{ income: number; expenses: number; investments: number } | null>(null);
 

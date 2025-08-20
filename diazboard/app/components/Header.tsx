@@ -21,9 +21,9 @@ export default function Header() {
   const { token } = theme.useToken();
 
   return (
-    <AntHeader style={{ background: token.colorBgContainer }} className="px-4 flex items-center justify-between shadow-sm">
+    <AntHeader style={{ background: token.colorBgContainer }} className="px-2 sm:px-4 flex items-center justify-between shadow-sm">
       <Space size={16} className="items-center">
-        <Typography.Title level={4} className="!mb-0">
+        <Typography.Title level={5} className="!mb-0">
           <Link href={`/dashboard`}>DiazBoard</Link>
         </Typography.Title>
         <Menu
@@ -36,10 +36,11 @@ export default function Header() {
             { key: "investments", label: <Link href={`/investments`}>Investments</Link> },
             { key: "about", label: <Link href={`/about`}>About</Link> },
           ]}
+          className="hidden md:block"
         />
       </Space>
-      <Space size={12}>
-        <Select value={currency} options={currencyOptions} style={{ width: 120 }} onChange={(v) => setCurrency(v as any)} />
+      <Space size={8}>
+        <Select value={currency} options={currencyOptions} style={{ width: 110 }} onChange={(v) => setCurrency(v as any)} />
       </Space>
     </AntHeader>
   );
