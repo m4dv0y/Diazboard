@@ -3,6 +3,7 @@ import { Button, Card, Modal, Table, Form, Input, DatePicker, Select, InputNumbe
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { SearchOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
 
 type Expense = {
   id: string;
@@ -55,7 +56,7 @@ export default function ExpensesPage() {
     setEditingExpense(record);
     form.setFieldsValue({
       ...record,
-      date: record.date ? new Date(record.date) : undefined,
+      date: record.date ? dayjs(record.date) : undefined,
       amount: record.amountCents / 100,
     });
     setOpen(true);
