@@ -47,6 +47,8 @@ export async function DELETE(req: NextRequest) {
   return NextResponse.json({ ok: true });
 }
 
+// duplicate PUT removed
+
 export async function PUT(req: NextRequest) {
   const body = await req.json();
   if (!body?.id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
